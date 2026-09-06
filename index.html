@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UFC FIGHT PREDICTOR • Octagon AI Analysis</title>
+  <meta name="description" content="Predict UFC bout outcomes using historical MMA dataset metrics and Random Forest classification machine learning.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥊</text></svg>">
+</head>
+<body>
+
+  <div class="app-wrapper">
+
+    <!-- ==========================================================================
+         HEADER: BOLD AND LARGE TITLE WITH LIVE MODEL BADGE & THEME TOGGLE
+         ========================================================================== -->
+    <header class="header-container">
+      <div class="title-group">
+        <!-- MANDATORY REQUIREMENT: BOLD TEXT AND LARGE TITLE -->
+        <h1 class="main-title" id="pageTitle">
+          🥊 <span class="title-highlight">UFC FIGHT PREDICTOR</span>
+        </h1>
+        <div class="title-subtext">
+          <span>AI Tale-of-the-Tape Machine Learning Engine</span>
+          <span class="badge-pill badge-live">
+            <span class="live-dot"></span> 7,000+ UFC Bouts Analyzed
+          </span>
+          <span class="badge-pill" id="featuresBadge">30 Feature Matrix</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Light/Dark Mode" aria-label="Toggle theme">
+          <span id="themeIcon">☀️</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ==========================================================================
+         MAIN WEIGHT CLASS SECTION (DARK & FORMAL IN NATURE WITH CASUAL LOOK)
+         ========================================================================== -->
+    <section class="weightclass-container" id="weightClassSection" aria-labelledby="wcHeading">
+      <div class="wc-header-row">
+        <div class="wc-formal-title" id="wcHeading">
+          <svg class="wc-seal" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <span>CHAMPIONSHIP DIVISION & WEIGHT CATEGORY</span>
+        </div>
+        <span class="wc-casual-tag" id="activeDivisionTag">ALL DIVISIONS</span>
+      </div>
+
+      <div class="select-wrapper">
+        <select id="weightClassSelect" class="main-wc-select" aria-label="Select UFC Weight Class">
+          <option value="All Weight Classes">🌐 All Weight Classes (Global Roster)</option>
+        </select>
+        <span class="select-icon">▼</span>
+      </div>
+
+      <!-- Casual Quick-Filter Division Pills -->
+      <div class="wc-pills-row" id="wcPillsContainer">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <div class="active-division-banner" id="divisionBanner">
+        <span id="divisionIcon">🌐</span>
+        <span id="divisionSubtitle">OPEN ROSTER • ALL WEIGHT CLASSES</span>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         FIGHTER SELECTION ARENA (RED CORNER vs BLUE CORNER)
+         Dropbox designed differently for each weight class's fighters
+         ========================================================================== -->
+    <section class="fighter-arena-grid" id="fighterArena">
+
+      <!-- RED CORNER FIGHTER CARD -->
+      <div class="fighter-card red-corner" id="redCard">
+        <div class="corner-header">
+          <div class="corner-label">
+            <span>🔴</span> RED CORNER (A)
+          </div>
+          <span class="corner-tag" id="redDivisionTag">DIVISION FIGHTER</span>
+        </div>
+
+        <div class="fighter-select-container">
+          <label for="fighterASelect" class="fighter-select-label">Select Red Corner Fighter:</label>
+          <input type="text" id="fighterASearch" class="fighter-quicksearch" placeholder="🔍 Quick filter fighters..." aria-label="Filter Red Corner Fighters">
+          <div class="select-wrapper">
+            <select id="fighterASelect" class="fighter-dropbox" aria-label="Red Corner Fighter">
+              <option value="">Loading fighters...</option>
+            </select>
+            <span class="select-icon">▼</span>
+          </div>
+        </div>
+
+        <!-- Quick Snapshot Stats Preview -->
+        <div class="fighter-quick-stats" id="quickStatsA">
+          <div class="stat-pill">
+            <div class="stat-pill-label">Stance / Reach</div>
+            <div class="stat-pill-value" id="quickReachA">-- cm</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-label">UFC Record</div>
+            <div class="stat-pill-value" id="quickRecordA">-- W / -- L</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-label">Streak</div>
+            <div class="stat-pill-value" id="quickStreakA">--</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER OCTAGON & SWAP CONTROLS -->
+      <div class="arena-vs-column">
+        <div class="octagon-badge" title="The Octagon">
+          <span>VS</span>
+        </div>
+        <button id="swapCornersBtn" class="swap-btn" title="Swap Red and Blue Corners">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 16V4M7 4L3 8M7 4L11 8M17 8v12M17 20l4-4M17 20l-4-4"/>
+          </svg>
+          <span>SWAP</span>
+        </button>
+      </div>
+
+      <!-- BLUE CORNER FIGHTER CARD -->
+      <div class="fighter-card blue-corner" id="blueCard">
+        <div class="corner-header">
+          <div class="corner-label">
+            <span>🔵</span> BLUE CORNER (B)
+          </div>
+          <span class="corner-tag" id="blueDivisionTag">DIVISION FIGHTER</span>
+        </div>
+
+        <div class="fighter-select-container">
+          <label for="fighterBSelect" class="fighter-select-label">Select Blue Corner Fighter:</label>
+          <input type="text" id="fighterBSearch" class="fighter-quicksearch" placeholder="🔍 Quick filter fighters..." aria-label="Filter Blue Corner Fighters">
+          <div class="select-wrapper">
+            <select id="fighterBSelect" class="fighter-dropbox" aria-label="Blue Corner Fighter">
+              <option value="">Loading fighters...</option>
+            </select>
+            <span class="select-icon">▼</span>
+          </div>
+        </div>
+
+        <!-- Quick Snapshot Stats Preview -->
+        <div class="fighter-quick-stats" id="quickStatsB">
+          <div class="stat-pill">
+            <div class="stat-pill-label">Stance / Reach</div>
+            <div class="stat-pill-value" id="quickReachB">-- cm</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-label">UFC Record</div>
+            <div class="stat-pill-value" id="quickRecordB">-- W / -- L</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-label">Streak</div>
+            <div class="stat-pill-value" id="quickStreakB">--</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==========================================================================
+         DYNAMIC ACTION BUTTONS
+         ========================================================================== -->
+    <div class="actions-bar">
+      <button id="predictBtn" class="btn-predict" title="Run Random Forest Machine Learning Prediction">
+        <span class="btn-text">⚡ PREDICT FIGHT</span>
+        <span class="spinner"></span>
+      </button>
+
+      <button id="randomMatchupBtn" class="btn-secondary" title="Pick two premier fighters in this division">
+        <span>🎲 Random Matchup</span>
+      </button>
+
+      <button id="resetMatchupBtn" class="btn-secondary" title="Reset fighters to default">
+        <span>🧹 Reset</span>
+      </button>
+
+      <button id="toggleStatsBtn" class="btn-secondary" title="Toggle Tale of the Tape detailed statistics">
+        <span>📊 Tale of the Tape</span>
+      </button>
+    </div>
+
+    <!-- ==========================================================================
+         PREDICTION RESULTS DASHBOARD & GRAPHS
+         ========================================================================== -->
+    <section class="prediction-section" id="predictionSection" aria-live="polite">
+
+      <!-- Champion Victory Proclamation -->
+      <div class="winner-banner-card" id="winnerBanner">
+        <div class="winner-crown">🏆</div>
+        <div class="winner-label">OCTAGON AI PREDICTED WINNER</div>
+        <h2 class="winner-name" id="winnerName">--</h2>
+        <div class="winner-subtext" id="winnerSubtext">--</div>
+      </div>
+
+      <!-- Dual Speedometer Gauges (Red Corner vs Blue Corner) -->
+      <div class="gauges-container">
+
+        <!-- Red Corner Gauge -->
+        <div class="gauge-card red-side">
+          <div class="gauge-fighter-name" id="gaugeNameA">--</div>
+          <span class="gauge-corner-tag">RED CORNER PROBABILITY</span>
+          <div class="svg-gauge-wrapper">
+            <svg class="svg-gauge-svg" viewBox="0 0 260 140">
+              <!-- Background semi-circle arc -->
+              <path class="gauge-bg-arc" d="M 25 130 A 105 105 0 0 1 235 130" />
+              <!-- Animated value arc -->
+              <path class="gauge-val-arc" id="gaugeArcA" d="M 25 130 A 105 105 0 0 1 235 130" stroke="#e63946" stroke-dasharray="330" stroke-dashoffset="330" />
+              <!-- Center needle -->
+              <polygon id="gaugeNeedleA" class="gauge-needle" points="130,135 126,35 134,35" fill="#e63946" transform="rotate(-90 130 130)" />
+              <circle cx="130" cy="130" r="8" fill="#e63946" />
+            </svg>
+            <div class="gauge-center-stat">
+              <div class="gauge-pct-number" id="gaugePctA">0%</div>
+              <div class="gauge-pct-label">WIN CONFIDENCE</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Blue Corner Gauge -->
+        <div class="gauge-card blue-side">
+          <div class="gauge-fighter-name" id="gaugeNameB">--</div>
+          <span class="gauge-corner-tag">BLUE CORNER PROBABILITY</span>
+          <div class="svg-gauge-wrapper">
+            <svg class="svg-gauge-svg" viewBox="0 0 260 140">
+              <!-- Background semi-circle arc -->
+              <path class="gauge-bg-arc" d="M 25 130 A 105 105 0 0 1 235 130" />
+              <!-- Animated value arc -->
+              <path class="gauge-val-arc" id="gaugeArcB" d="M 25 130 A 105 105 0 0 1 235 130" stroke="#1d70b8" stroke-dasharray="330" stroke-dashoffset="330" />
+              <!-- Center needle -->
+              <polygon id="gaugeNeedleB" class="gauge-needle" points="130,135 126,35 134,35" fill="#1d70b8" transform="rotate(-90 130 130)" />
+              <circle cx="130" cy="130" r="8" fill="#1d70b8" />
+            </svg>
+            <div class="gauge-center-stat">
+              <div class="gauge-pct-number" id="gaugePctB">0%</div>
+              <div class="gauge-pct-label">WIN CONFIDENCE</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tale of the Tape / Matchup Statistics Comparison Table -->
+      <div class="stats-table-card" id="statsTableCard">
+        <div class="stats-card-header">
+          <div class="stats-card-title">
+            <span>📋</span> HEAD-TO-HEAD TALE OF THE TAPE
+          </div>
+          <div class="title-subtext">
+            <span>🔴 Red Corner vs 🔵 Blue Corner Advantage</span>
+          </div>
+        </div>
+
+        <div class="comparison-table-wrapper">
+          <div class="comparison-grid" id="comparisonRowsContainer">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Footer / Legal / Model Notice -->
+    <footer class="footer-note">
+      <p>Powered by Random Forest Classification trained on 7,000+ official UFC bouts • Features: Reach, Stance, Strikes, Takedowns, KOs & Odds</p>
+    </footer>
+
+  </div>
+
+  <!-- Toast Notification Message -->
+  <div id="toast" class="toast-msg" role="alert"></div>
+
+  <!-- Pure Vanilla JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>
