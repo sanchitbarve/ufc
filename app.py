@@ -13,29 +13,40 @@ st.write("Select a weight class and two fighters to predict the winner based on 
 def load_data_and_train():
     df = pd.read_csv("ufc-master.csv")
 
-    # Explicitly selected pre-fight features
+    # Expanded pre-fight features incorporating Reach, KO, Submissions, and Wins
     features = [
-        # Physical Attributes
-        "R_age", "B_age", "R_height_cms", "B_height_cms", "R_reach_cms", "B_reach_cms",
-        # Fight History & Streaks
-        "R_wins", "B_wins", "R_losses", "B_losses",
+        # Physical & Reach Attributes
+        "R_age", "B_age", 
+        "R_height_cms", "B_height_cms", 
+        "R_reach_cms", "B_reach_cms",
+        
+        # Fight History, Wins, & Streaks
+        "R_wins", "B_wins", 
+        "R_losses", "B_losses",
         "R_current_win_streak", "B_current_win_streak",
         "R_current_lose_streak", "B_current_lose_streak",
+        
+        # Finish Traits (KOs & Submissions)
+        "R_win_by_KO/TKO", "B_win_by_KO/TKO",
+        "R_win_by_Submission", "B_win_by_Submission",
+        "R_avg_SUB_ATT", "B_avg_SUB_ATT",
+        
         # Striking Metrics
         "R_avg_SIG_STR_pct", "B_avg_SIG_STR_pct",
         "R_avg_SIG_STR_landed", "B_avg_SIG_STR_landed",
+        
         # Grappling Metrics
         "R_avg_TD_pct", "B_avg_TD_pct",
         "R_avg_TD_landed", "B_avg_TD_landed",
-        "R_avg_SUB_ATT", "B_avg_SUB_ATT",
+        
         # Betting Odds
         "R_odds", "B_odds"
     ]
 
-    # Filter to columns that exist in CSV
+    # Filter to columns that actually exist in your CSV
     existing_features = [col for col in features if col in df.columns]
 
-    # Clean missing values
+    # Clean missing values with column medians
     df_clean = df.copy()
     df_clean[existing_features] = df_clean[existing_features].fillna(
         df_clean[existing_features].median()
@@ -45,7 +56,7 @@ def load_data_and_train():
     X = df_clean[existing_features]
     y = df_clean["Winner"]
 
-    # Train Random Forest
+    # Train Random Forest Classifier
     model = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42)
     model.fit(X, y)
 
@@ -199,23 +210,28 @@ try:
                     fig_b = create_gauge_chart(fighter_b, prob_b, "#0275d8")
                     st.plotly_chart(fig_b, use_container_width=True)
 
-                # Stats Table
+                # Detailed Matchup Statistics Comparison Table
                 with st.expander("Show Matchup Statistics Comparison"):
-                    metrics_to_show = [
-                        "age",
-                        "wins",
-                        "losses",
-                        "current_win_streak",
-                        "avg_SIG_STR_pct",
-                        "avg_TD_pct",
-                    ]
-                    comp_data = {"Metric": metrics_to_show}
+                    display_metrics = {
+                        "Reach (cm)": "reach_cms",
+                        "Total Wins": "wins",
+                        "Total Losses": "losses",
+                        "KO/TKO Wins": "win_by_KO/TKO",
+                        "Submission Wins": "win_by_Submission",
+                        "Win Streak": "current_win_streak",
+                        "Sig. Striking %": "avg_SIG_STR_pct",
+                        "Takedown %": "avg_TD_pct",
+                    }
+
+                    comp_data = {"Metric": list(display_metrics.keys())}
 
                     comp_data[fighter_a] = [
-                        f"{stats_a.get(m, 0):.2f}" for m in metrics_to_show
+                        f"{stats_a.get(raw_key, 0):.1f}"
+                        for raw_key in display_metrics.values()
                     ]
                     comp_data[fighter_b] = [
-                        f"{stats_b.get(m, 0):.2f}" for m in metrics_to_show
+                        f"{stats_b.get(raw_key, 0):.1f}"
+                        for raw_key in display_metrics.values()
                     ]
 
                     comp_df = pd.DataFrame(comp_data)
