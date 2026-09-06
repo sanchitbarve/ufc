@@ -3,9 +3,9 @@ import plotly.graph_objects as go
 import streamlit as st
 from sklearn.ensemble import RandomForestClassifier
 
-st.set_page_config(page_title="UFC Fight Predictor", page_icon="🥊", layout="wide")
+st.set_page_config(page_title="CAGE MATRIX", page_icon="🥊", layout="wide")
 
-st.title("🥊 UFC Fight Predictor")
+st.title("🥊 CAGE MATRIX")
 st.write("Select a weight class and two fighters to predict the winner based on historical stats.")
 
 

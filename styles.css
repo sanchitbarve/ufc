@@ -200,7 +200,9 @@
 /* ==========================================================================
    BASE & RESET STYLES
    ========================================================================== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -310,8 +312,17 @@ body {
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
 }
 
 /* Header Action Controls */
@@ -551,6 +562,7 @@ body {
 .fighter-card.red-corner {
   border-top: 4px solid var(--red-corner);
 }
+
 .fighter-card.red-corner::after {
   content: '';
   position: absolute;
@@ -567,6 +579,7 @@ body {
 .fighter-card.blue-corner {
   border-top: 4px solid var(--blue-corner);
 }
+
 .fighter-card.blue-corner::after {
   content: '';
   position: absolute;
@@ -826,9 +839,17 @@ body {
 }
 
 @keyframes shine {
-  0% { left: -100%; }
-  25% { left: 150%; }
-  100% { left: 150%; }
+  0% {
+    left: -100%;
+  }
+
+  25% {
+    left: 150%;
+  }
+
+  100% {
+    left: 150%;
+  }
 }
 
 .btn-predict:hover {
@@ -858,12 +879,15 @@ body {
 .btn-predict.loading .spinner {
   display: inline-block;
 }
+
 .btn-predict.loading .btn-text {
   display: none;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Secondary Action Buttons */
@@ -894,7 +918,8 @@ body {
    PREDICTION GRAPH & OUTCOME DASHBOARD
    ========================================================================== */
 .prediction-section {
-  display: none; /* Shown dynamically via JS */
+  display: none;
+  /* Shown dynamically via JS */
   flex-direction: column;
   gap: 2rem;
   animation: fadeIn 0.5s ease forwards;
@@ -905,8 +930,15 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Winner Proclamation Card */
@@ -928,8 +960,15 @@ body {
 }
 
 @keyframes bounce-trophy {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .winner-label {
