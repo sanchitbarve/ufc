@@ -12,8 +12,8 @@ st.write(
 
 @st.cache_data
 def load_data_and_train():
-    # Update to look inside .vscode
-    df = pd.read_csv(".vscode/ufc-master.csv")
+    # Change from ".vscode/ufc-master.csv" to "ufc-master.csv"
+    df = pd.read_csv("ufc-master.csv")
 
     features = [
         "R_age",
