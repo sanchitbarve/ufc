@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 st.set_page_config(page_title="UFC Fight Predictor", page_icon="🥊", layout="wide")
 
 st.title("🥊 UFC Fight Predictor")
-st.write("Select two fighters to predict the winner based on historical statistics.")
+st.write("Select a weight class and two fighters to predict the winner based on historical stats.")
 
 
 @st.cache_data
@@ -113,89 +113,113 @@ def create_gauge_chart(fighter_name, probability, color):
 try:
     model, df, feature_names = load_data_and_train()
 
+    # --- WEIGHT CLASS FILTERING ---
+    if "weight_class" in df.columns:
+        weight_classes = ["All Weight Classes"] + sorted(
+            [str(wc) for wc in df["weight_class"].dropna().unique()]
+        )
+    else:
+        weight_classes = ["All Weight Classes"]
+
+    selected_wc = st.selectbox("🏋️ Filter by Weight Class", weight_classes)
+
+    # Filter dataframe based on weight class selection
+    if selected_wc != "All Weight Classes" and "weight_class" in df.columns:
+        filtered_df = df[df["weight_class"] == selected_wc]
+    else:
+        filtered_df = df
+
+    # Get unique fighters present in the filtered dataframe
     fighters = sorted(
-        list(set(df["R_fighter"].dropna()).union(set(df["B_fighter"].dropna())))
+        list(
+            set(filtered_df["R_fighter"].dropna()).union(
+                set(filtered_df["B_fighter"].dropna())
+            )
+        )
     )
 
-    col1, col2 = st.columns(2)
-    with col1:
-        fighter_a = st.selectbox("Select Fighter A (Red Corner)", fighters, index=0)
-    with col2:
-        fighter_b = st.selectbox(
-            "Select Fighter B (Blue Corner)",
-            fighters,
-            index=min(1, len(fighters) - 1),
-        )
+    if not fighters:
+        st.warning("No fighters found for the selected weight class.")
+    else:
+        col1, col2 = st.columns(2)
+        with col1:
+            fighter_a = st.selectbox("Select Fighter A (Red Corner)", fighters, index=0)
+        with col2:
+            fighter_b = st.selectbox(
+                "Select Fighter B (Blue Corner)",
+                fighters,
+                index=min(1, len(fighters) - 1),
+            )
 
-    if st.button("PREDICT FIGHT", type="primary"):
-        if fighter_a == fighter_b:
-            st.warning("Please select two different fighters.")
-        else:
-            stats_a = get_fighter_stats_dict(df, fighter_a, feature_names)
-            stats_b = get_fighter_stats_dict(df, fighter_b, feature_names)
+        if st.button("PREDICT FIGHT", type="primary"):
+            if fighter_a == fighter_b:
+                st.warning("Please select two different fighters.")
+            else:
+                stats_a = get_fighter_stats_dict(df, fighter_a, feature_names)
+                stats_b = get_fighter_stats_dict(df, fighter_b, feature_names)
 
-            # Construct input row matching model feature expectations exactly
-            input_row = []
-            for col in feature_names:
-                if col.startswith("R_"):
-                    stat_key = col[2:]
-                    input_row.append(stats_a.get(stat_key, 0.0))
-                elif col.startswith("B_"):
-                    stat_key = col[2:]
-                    input_row.append(stats_b.get(stat_key, 0.0))
-                else:
-                    input_row.append(0.0)
+                # Construct input row matching model feature expectations
+                input_row = []
+                for col in feature_names:
+                    if col.startswith("R_"):
+                        stat_key = col[2:]
+                        input_row.append(stats_a.get(stat_key, 0.0))
+                    elif col.startswith("B_"):
+                        stat_key = col[2:]
+                        input_row.append(stats_b.get(stat_key, 0.0))
+                    else:
+                        input_row.append(0.0)
 
-            input_data = pd.DataFrame([input_row], columns=feature_names)
+                input_data = pd.DataFrame([input_row], columns=feature_names)
 
-            # --- PREDICTION & PROBABILITIES ---
-            prediction = model.predict(input_data)[0]
-            probs = model.predict_proba(input_data)[0]
+                # Predict outcomes
+                prediction = model.predict(input_data)[0]
+                probs = model.predict_proba(input_data)[0]
 
-            classes = list(model.classes_)
-            red_idx = classes.index("Red") if "Red" in classes else 0
-            blue_idx = classes.index("Blue") if "Blue" in classes else 1
+                classes = list(model.classes_)
+                red_idx = classes.index("Red") if "Red" in classes else 0
+                blue_idx = classes.index("Blue") if "Blue" in classes else 1
 
-            prob_a = probs[red_idx]
-            prob_b = probs[blue_idx]
+                prob_a = probs[red_idx]
+                prob_b = probs[blue_idx]
 
-            winner = fighter_a if prediction == "Red" else fighter_b
+                winner = fighter_a if prediction == "Red" else fighter_b
 
-            st.success(f"**Predicted Winner:** 🏆 {winner}")
+                st.success(f"**Predicted Winner:** 🏆 {winner}")
 
-            # --- DISPLAY PLOTLY GAUGE CHARTS ---
-            st.subheader("Win Probability Breakdown")
-            col_gauge1, col_gauge2 = st.columns(2)
+                # Gauge Charts
+                st.subheader("Win Probability Breakdown")
+                col_gauge1, col_gauge2 = st.columns(2)
 
-            with col_gauge1:
-                fig_a = create_gauge_chart(fighter_a, prob_a, "#d9534f")
-                st.plotly_chart(fig_a, use_container_width=True)
+                with col_gauge1:
+                    fig_a = create_gauge_chart(fighter_a, prob_a, "#d9534f")
+                    st.plotly_chart(fig_a, use_container_width=True)
 
-            with col_gauge2:
-                fig_b = create_gauge_chart(fighter_b, prob_b, "#0275d8")
-                st.plotly_chart(fig_b, use_container_width=True)
+                with col_gauge2:
+                    fig_b = create_gauge_chart(fighter_b, prob_b, "#0275d8")
+                    st.plotly_chart(fig_b, use_container_width=True)
 
-            # --- STATISTICAL COMPARISON TABLE ---
-            with st.expander("Show Matchup Statistics Comparison"):
-                metrics_to_show = [
-                    "age",
-                    "wins",
-                    "losses",
-                    "current_win_streak",
-                    "avg_SIG_STR_pct",
-                    "avg_TD_pct",
-                ]
-                comp_data = {"Metric": metrics_to_show}
+                # Stats Table
+                with st.expander("Show Matchup Statistics Comparison"):
+                    metrics_to_show = [
+                        "age",
+                        "wins",
+                        "losses",
+                        "current_win_streak",
+                        "avg_SIG_STR_pct",
+                        "avg_TD_pct",
+                    ]
+                    comp_data = {"Metric": metrics_to_show}
 
-                comp_data[fighter_a] = [
-                    f"{stats_a.get(m, 0):.2f}" for m in metrics_to_show
-                ]
-                comp_data[fighter_b] = [
-                    f"{stats_b.get(m, 0):.2f}" for m in metrics_to_show
-                ]
+                    comp_data[fighter_a] = [
+                        f"{stats_a.get(m, 0):.2f}" for m in metrics_to_show
+                    ]
+                    comp_data[fighter_b] = [
+                        f"{stats_b.get(m, 0):.2f}" for m in metrics_to_show
+                    ]
 
-                comp_df = pd.DataFrame(comp_data)
-                st.dataframe(comp_df, use_container_width=True)
+                    comp_df = pd.DataFrame(comp_data)
+                    st.dataframe(comp_df, use_container_width=True)
 
 except Exception as e:
     st.error(f"Make sure 'ufc-master.csv' is in your folder. Error details: {e}")
