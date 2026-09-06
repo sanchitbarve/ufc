@@ -1,3 +1,15 @@
+import pandas as pd
+import streamlit as st
+from sklearn.ensemble import RandomForestClassifier
+
+st.set_page_config(page_title="UFC Fight Predictor", page_icon="🥊", layout="wide")
+
+st.title("🥊 UFC Fight Predictor")
+st.write(
+    "Select two fighters to predict the winner based on historical statistics."
+)
+
+
 import streamlit as st
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
