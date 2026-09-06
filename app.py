@@ -1,41 +1,48 @@
-import pandas as pd
 import streamlit as st
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-
-st.set_page_config(page_title="UFC Fight Predictor", page_icon="🥊", layout="wide")
-
-st.title("🥊 UFC Fight Predictor")
-st.write(
-    "Select two fighters to predict the winner based on historical statistics."
-)
-
 
 @st.cache_data
 def load_data_and_train():
-    # Change from ".vscode/ufc-master.csv" to "ufc-master.csv"
     df = pd.read_csv("ufc-master.csv")
 
+    # Explicitly selected pre-fight features (including differential columns)
     features = [
-        "R_age",
-        "B_age",
-        "R_wins",
-        "B_wins",
-        "R_avg_SIG_STR_pct",
-        "B_avg_SIG_STR_pct",
-        "R_avg_TD_pct",
-        "B_avg_TD_pct",
+        # Physical Attributes
+        "R_age", "B_age", "R_height_cms", "B_height_cms", "R_reach_cms", "B_reach_cms",
+        
+        # Fight History & Streaks
+        "R_wins", "B_wins", "R_losses", "B_losses",
+        "R_current_win_streak", "B_current_win_streak",
+        "R_current_lose_streak", "B_current_lose_streak",
+        
+        # Striking Metrics
+        "R_avg_SIG_STR_pct", "B_avg_SIG_STR_pct",
+        "R_avg_SIG_STR_landed", "B_avg_SIG_STR_landed",
+        
+        # Grappling Metrics
+        "R_avg_TD_pct", "B_avg_TD_pct",
+        "R_avg_TD_landed", "B_avg_TD_landed",
+        "R_avg_SUB_ATT", "B_avg_SUB_ATT",
+        
+        # Betting Odds (Implied Probabilities)
+        "R_odds", "B_odds"
     ]
 
-    df_clean = df.dropna(subset=features + ["Winner"]).copy()
+    # Filter to columns that actually exist in your CSV
+    existing_features = [col for col in features if col in df.columns]
 
-    X = df_clean[features]
+    # Clean dataset
+    df_clean = df.dropna(subset=existing_features + ["Winner"]).copy()
+
+    X = df_clean[existing_features]
     y = df_clean["Winner"]
 
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    # Train Random Forest
+    model = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42)
     model.fit(X, y)
 
-    return model, df, features
-
+    return model, df, existing_features
 
 def get_fighter_stats(df, fighter_name):
     """Retrieve fighter statistics across both Red and Blue corner entries."""
